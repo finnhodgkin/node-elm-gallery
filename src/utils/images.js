@@ -9,7 +9,7 @@ module.exports = {
     });
   },
   getSingleImage: (imageDirectory, callback) => {
-    fs.readdir(`./../../images/${imageDirectory}`, (err, list) => {
+    fs.readdir(`./public/images/${imageDirectory}`, (err, list) => {
       if (err) return callback(err);
 
       callback(null, list);
