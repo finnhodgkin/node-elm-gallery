@@ -1,0 +1,21 @@
+{
+  "name": "elm-gallery",
+  "version": "1.0.0",
+  "description": "A Node & Elm web gallery",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "nodemon start.js",
+    "test": "tape src/*.spec.js | tap-spec"
+  },
+  "author": "Finn Hodgkin",
+  "license": "ISC",
+  "dependencies": {
+    "hapi": "^16.5.0",
+    "inert": "^4.2.0"
+  },
+  "devDependencies": {
+    "tap-spec": "^4.1.1",
+    "tape": "^4.7.0"
+  }
+}
