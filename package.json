@@ -4,8 +4,9 @@
   "description": "A Node & Elm web gallery",
   "main": "start.js",
   "scripts": {
-    "start": "node start.js",
-    "dev": "nodemon start.js",
+    "start": "node start",
+    "dev": "nodemon start",
+    "elm-dev": "elm-live elm/Main.elm --output=public/js/app.js",
     "test": "tape src/*.spec.js | tap-spec"
   },
   "author": "Finn Hodgkin",

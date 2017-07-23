@@ -56,7 +56,7 @@ view model =
 single : Model -> Html Msg
 single model =
     Html.section []
-        [ Html.img [ src "/images/test.jpg" ] []
+        [ Html.img [ src "./images/test.jpg" ] []
         ]
 
 

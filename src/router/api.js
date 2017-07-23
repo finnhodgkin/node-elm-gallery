@@ -2,7 +2,7 @@ const { getAllImages, getSingleImage } = require('./../utils/images.js');
 
 module.exports = {
   method: 'GET',
-  path: '/images/{type}',
+  path: '/imgs/{type}',
   handler: (req, reply) => {
     const type = {
       all: 'all',
