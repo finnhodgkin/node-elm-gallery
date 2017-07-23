@@ -29,7 +29,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [ "" ] [ "" ] "", Cmd.none )
+    ( Model "" [ "" ] [ "" ] "single", Cmd.none )
 
 
 type Msg
@@ -55,7 +55,9 @@ view model =
 
 single : Model -> Html Msg
 single model =
-    div [] []
+    Html.section []
+        [ Html.img [ src "/images/test.jpg" ] []
+        ]
 
 
 home : Model -> Html Msg
