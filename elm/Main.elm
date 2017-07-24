@@ -56,13 +56,15 @@ view model =
 single : Model -> Html Msg
 single model =
     Html.section []
-        [ Html.img [ src "./images/test.jpg" ] []
+        [ Html.img [ src model.singleImage ] []
+        , Html.section []
+            (List.map (\thumb -> Html.img [ src thumb ] []) model.singleThumbs)
         ]
 
 
 home : Model -> Html Msg
 home model =
-    div [] []
+    div [] (List.map (\thumb -> Html.img [ src thumb ] []) model.singleThumbs)
 
 
 subscriptions : a -> Sub Msg
