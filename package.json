@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node start",
     "dev": "nodemon start",
-    "elm-dev": "elm-live elm/Main.elm --output=public/js/app.js",
+    "elm-dev": "elm-live --debug elm/Main.elm --output=public/js/app.js",
     "test": "tape src/*.spec.js | tap-spec"
   },
   "author": "Finn Hodgkin",
