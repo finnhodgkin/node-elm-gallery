@@ -1,10 +1,10 @@
 port module Main exposing (..)
 
--- import Html.Events exposing (..)
 -- import Json.Encode exposing (Value)
 
 import Html exposing (..)
 import Html.Attributes as HA exposing (..)
+import Html.Events exposing (..)
 import Http exposing (..)
 import Json.Decode exposing (..)
 import Task exposing (..)
@@ -22,7 +22,9 @@ main =
 
 type alias Model =
     { singleImage : String
-    , singleThumbs : List String
+    , singleImageDirectory : String
+    , singleImageLoaded : Maybe String
+    , singleImageList : List String
     , allThumbs : List String
     , route : String
     , error : String
@@ -31,11 +33,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        test =
-            "./images/test.jpg"
-    in
-    ( Model test [ test, test, test ] [ "" ] "" ""
+    ( Model "" "" Nothing [ "" ] [ "" ] "" ""
     , Task.attempt handleFetch (Http.toTask (Http.get "/imgs/all" decodeImageList))
     )
 
@@ -58,6 +56,10 @@ decodeImageList =
 type Msg
     = DisplayAllThumbs (List String)
     | ShowErrorMessage String
+    | GetSinglePage String
+    | DisplaySingleResult (List String) String
+    | ImageLoaded String
+    | ShowSingleImage String String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,8 +68,43 @@ update msg model =
         DisplayAllThumbs thumbs ->
             ( { model | allThumbs = thumbs }, Cmd.none )
 
+        GetSinglePage imageDirectory ->
+            ( model, getImage imageDirectory )
+
+        DisplaySingleResult imageList directory ->
+            ( { model | singleImageList = List.map (\image -> directory ++ image) imageList, route = shouldSingleImage model, singleImage = directory ++ "main.jpg" }, Cmd.none )
+
         ShowErrorMessage errorString ->
             ( { model | error = errorString }, Cmd.none )
+
+        ImageLoaded imgSrc ->
+            ( { model | singleImageLoaded = Just imgSrc }, Cmd.none )
+
+        ShowSingleImage directory imageName ->
+            ( { model | singleImage = directory ++ imageName }, Cmd.none )
+
+
+shouldSingleImage : Model -> String
+shouldSingleImage model =
+    if model.singleImage /= "" && model.singleImageList /= [ "" ] then
+        "single"
+    else
+        ""
+
+
+getImage : String -> Cmd Msg
+getImage imageDirectory =
+    Task.attempt (handleSingleImageFetch imageDirectory) (Http.toTask (Http.get ("/imgs/single?image=" ++ imageDirectory) decodeImageList))
+
+
+handleSingleImageFetch : String -> Result error (List String) -> Msg
+handleSingleImageFetch directory result =
+    case result of
+        Ok result ->
+            DisplaySingleResult result directory
+
+        Err _ ->
+            ShowErrorMessage "Error fetching list of images."
 
 
 view : Model -> Html Msg
@@ -82,18 +119,51 @@ view model =
 
 single : Model -> Html Msg
 single model =
+    let
+        imageLoader =
+            case model.singleImageLoaded of
+                Just imageSrc ->
+                    Html.img [ class "single", src imageSrc ] []
+
+                Nothing ->
+                    div
+                        []
+                        [ text "blah" ]
+
+        imageDirectory =
+            "./images/" ++ model.singleImageDirectory ++ "/"
+    in
     Html.section []
-        [ Html.img [ src model.singleImage, class "single" ] []
+        [ imageLoader
         , Html.section []
-            (List.map buildSingleThumb model.singleThumbs)
+            (List.map (buildSingleThumb imageDirectory) model.singleImageList)
+        , Html.img [ class "visuallyhidden", src (imageDirectory ++ model.singleImage), onLoadSrc ImageLoaded ] []
+        , Html.section []
+            (List.map preloadFullSize model.singleImageList)
         ]
 
 
-buildSingleThumb : String -> Html Msg
-buildSingleThumb thumb =
+preloadFullSize : String -> Html Msg
+preloadFullSize image =
+    Html.img [ class "visuallyhidden", src image ] []
+
+
+onLoadSrc : (String -> msg) -> Html.Attribute msg
+onLoadSrc tagger =
+    on "load" (Json.Decode.map tagger targetSrc)
+
+
+targetSrc : Json.Decode.Decoder String
+targetSrc =
+    Json.Decode.at [ "target", "src" ] Json.Decode.string
+
+
+buildSingleThumb : String -> String -> Html Msg
+buildSingleThumb directory image =
     Html.figure
         [ class "singleThumb"
-        , style [ ( "background-image", "url(./images/" ++ thumb ++ ")" ) ]
+        , style [ ( "background-image", "url(" ++ directory ++ "thumbs/" ++ image ++ ")" ) ]
+        , onClick (ShowSingleImage directory image)
         ]
         []
 

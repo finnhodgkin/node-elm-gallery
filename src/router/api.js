@@ -4,10 +4,7 @@ module.exports = {
   method: 'GET',
   path: '/imgs/{type}',
   handler: (req, reply) => {
-    const type = {
-      all: 'all',
-      single: 'single',
-    }[req.params.type];
+    const type = { all: 'all', single: 'single' }[req.params.type];
 
     switch (type) {
       case 'all':
