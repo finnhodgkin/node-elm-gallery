@@ -59,7 +59,9 @@ type Msg
     | GetSinglePage String
     | DisplaySingleResult (List String) String
     | ImageLoaded String
+      -- | LoadingPainting String String
     | ShowSingleImage String String
+    | SwapSingleImage String String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,7 +74,11 @@ update msg model =
             ( model, getImage imageDirectory )
 
         DisplaySingleResult imageList directory ->
-            ( { model | singleImageList = List.map (\image -> directory ++ image) imageList, route = shouldSingleImage model, singleImage = directory ++ "main.jpg" }, Cmd.none )
+            let
+                newModel =
+                    { model | singleImageList = imageList, singleImage = "main.jpg", singleImageDirectory = directory }
+            in
+            ( { model | singleImageList = imageList, route = shouldSingleImage newModel, singleImage = "main.jpg", singleImageDirectory = directory }, Cmd.none )
 
         ShowErrorMessage errorString ->
             ( { model | error = errorString }, Cmd.none )
@@ -81,7 +87,10 @@ update msg model =
             ( { model | singleImageLoaded = Just imgSrc }, Cmd.none )
 
         ShowSingleImage directory imageName ->
-            ( { model | singleImage = directory ++ imageName }, Cmd.none )
+            ( { model | singleImage = imageName, singleImageDirectory = directory }, getImage directory )
+
+        SwapSingleImage directory imageName ->
+            ( { model | singleImage = imageName }, Cmd.none )
 
 
 shouldSingleImage : Model -> String
@@ -163,7 +172,7 @@ buildSingleThumb directory image =
     Html.figure
         [ class "singleThumb"
         , style [ ( "background-image", "url(" ++ directory ++ "thumbs/" ++ image ++ ")" ) ]
-        , onClick (ShowSingleImage directory image)
+        , onClick (SwapSingleImage directory image)
         ]
         []
 
@@ -177,10 +186,11 @@ home model =
 
 
 buildAllThumbs : String -> Html Msg
-buildAllThumbs thumbs =
+buildAllThumbs directory =
     Html.figure
         [ class "allThumb"
-        , style [ ( "background-image", "url(./images/" ++ thumbs ++ "/thumb.jpg)" ) ]
+        , style [ ( "background-image", "url(./images/" ++ directory ++ "/thumbs/main.jpg)" ) ]
+        , onClick (ShowSingleImage directory "main.jpg")
         ]
         []
 
