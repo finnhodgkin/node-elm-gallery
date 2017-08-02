@@ -142,14 +142,9 @@ single model =
     Html.section []
         [ imageLoader
         , Html.section []
-            (List.map (buildSingleThumb imageDirectory) model.singleImageList)
+            (List.map (buildSingleThumb imageDirectory model.singleImage) model.singleImageList)
         , Html.img [ class "visuallyhidden", src (imageDirectory ++ model.singleImage), onLoadSrc ImageLoaded ] []
         ]
-
-
-preloadFullSize : String -> Html Msg
-preloadFullSize image =
-    Html.img [ class "visuallyhidden", src image ] []
 
 
 onLoadSrc : (String -> msg) -> Html.Attribute msg
@@ -162,13 +157,22 @@ targetSrc =
     Json.Decode.at [ "target", "src" ] Json.Decode.string
 
 
-buildSingleThumb : String -> String -> Html Msg
-buildSingleThumb directory image =
+buildSingleThumb : String -> String -> String -> Html Msg
+buildSingleThumb directory originalImage image =
+    let
+        html =
+            if image == originalImage then
+                [ class "singleThumb singleThumb__selected"
+                , style [ ( "background-image", "url(" ++ directory ++ "thumbs/" ++ image ++ ")" ) ]
+                ]
+            else
+                [ class "singleThumb"
+                , style [ ( "background-image", "url(" ++ directory ++ "thumbs/" ++ image ++ ")" ) ]
+                , onClick (SwapSingleImage directory image)
+                ]
+    in
     Html.figure
-        [ class "singleThumb"
-        , style [ ( "background-image", "url(" ++ directory ++ "thumbs/" ++ image ++ ")" ) ]
-        , onClick (SwapSingleImage directory image)
-        ]
+        html
         []
 
 

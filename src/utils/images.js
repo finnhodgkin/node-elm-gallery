@@ -14,7 +14,7 @@ module.exports = {
     fs.readdir(`./public/images/${imageDirectory}`, (err, list) => {
       if (err) return callback(err);
 
-      callback(null, list);
+      callback(null, list.filter(file => file.split('.').length !== 1));
     });
   },
 };
