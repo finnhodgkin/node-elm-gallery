@@ -1,7 +1,5 @@
 port module Main exposing (..)
 
--- import Json.Encode exposing (Value)
-
 import Html exposing (..)
 import Html.Attributes as HA exposing (..)
 import Html.Events exposing (..)
@@ -59,7 +57,6 @@ type Msg
     | GetSinglePage String
     | DisplaySingleResult (List String) String
     | ImageLoaded String
-      -- | LoadingPainting String String
     | ShowSingleImage String String
     | SwapSingleImage String String
 
@@ -68,7 +65,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DisplayAllThumbs thumbs ->
-            ( { model | allThumbs = thumbs }, Cmd.none )
+            { model | allThumbs = thumbs } ! []
 
         GetSinglePage imageDirectory ->
             ( model, getImage imageDirectory )
@@ -78,19 +75,19 @@ update msg model =
                 newModel =
                     { model | singleImageList = imageList, singleImage = "main.jpg", singleImageDirectory = directory }
             in
-            ( { model | singleImageList = imageList, route = shouldSingleImage newModel, singleImage = "main.jpg", singleImageDirectory = directory }, Cmd.none )
+            { model | singleImageList = imageList, route = shouldSingleImage newModel, singleImage = "main.jpg", singleImageDirectory = directory } ! []
 
         ShowErrorMessage errorString ->
-            ( { model | error = errorString }, Cmd.none )
+            { model | error = errorString } ! []
 
         ImageLoaded imgSrc ->
-            ( { model | singleImageLoaded = Just imgSrc }, Cmd.none )
+            { model | singleImageLoaded = Just imgSrc } ! []
 
         ShowSingleImage directory imageName ->
             ( { model | singleImage = imageName, singleImageDirectory = directory }, getImage directory )
 
         SwapSingleImage directory imageName ->
-            ( { model | singleImage = imageName }, Cmd.none )
+            { model | singleImage = imageName, singleImageLoaded = Nothing } ! []
 
 
 shouldSingleImage : Model -> String
@@ -147,8 +144,6 @@ single model =
         , Html.section []
             (List.map (buildSingleThumb imageDirectory) model.singleImageList)
         , Html.img [ class "visuallyhidden", src (imageDirectory ++ model.singleImage), onLoadSrc ImageLoaded ] []
-        , Html.section []
-            (List.map preloadFullSize model.singleImageList)
         ]
 
 
